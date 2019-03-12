@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -16,11 +15,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.sql.Connection;
 import java.sql.Statement;
@@ -33,32 +33,37 @@ import static java.lang.Thread.sleep;
 public class register extends AppCompatActivity {
     UserInformation user;
     String email,phnum,name,pass;
-     Button insert;
-    FirebaseDatabase mDatabase;
-    DatabaseReference ref;
+    FirebaseDatabase reff= FirebaseDatabase.getInstance();
+    DatabaseReference mDatabase =reff.getReference("userDB");
+    //Firebase ff;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+      //  Firebase.setAndroidContext(this);
         setContentView(R.layout.activity_register3);
-        //final Button button=findViewById(R.id.button);
-
-        Toast.makeText(register.this, "Hello", Toast.LENGTH_LONG).show();
+        final Button button=findViewById(R.id.button);
 
 
 
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+               View focus=null;
+                boolean cancel=true;
+                //Toast.makeText(register.this,"entry point",Toast.LENGTH_LONG).show();
                 EditText edEmail = (EditText)findViewById(R.id.Email);
                 String email= edEmail.getText().toString();
-                /*Pattern p;
+                Pattern p;
                 p = Pattern.compile("^[a-z0-9]+@[a-z]+\\.[a-z]+$");
                 Matcher m = p.matcher(email);
                 if(!m.matches()){
                     edEmail.setError("Invalid email");
                     focus=edEmail;
                     cancel=false;
-                }*/
+                }
                 EditText  edPh = (EditText)findViewById(R.id.PhNum);
                 String phnum= edPh.getText().toString();
-                /*p=Pattern.compile("\\+[0-9]{12}");
+                p=Pattern.compile("\\+[0-9]{12}");
                 m = p.matcher(phnum);
                 if(!m.matches()){
                     edPh.setError("Invalid phone number");
@@ -66,21 +71,21 @@ public class register extends AppCompatActivity {
                     cancel=false;
                 }
 
-*/
+
                 EditText edName = (EditText)findViewById(R.id.Name);
                 String name= edName.getText().toString();
-               /* p=Pattern.compile("[A-Za-z]+");
+                p=Pattern.compile("[A-Za-z]+");
                 m = p.matcher(name);
                 if(!m.matches()){
                     edName.setError("Invalid name");
                     focus=edName;
                     cancel=false;
                 }
-*/
+
 
                 EditText  edPass = (EditText)findViewById(R.id.Password);
                 String pass= edPass.getText().toString();
-               /* p=Pattern.compile("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{4,20}$");
+                p=Pattern.compile("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{4,20}$");
                 m = p.matcher(pass);
                 if(!m.matches()){
                     edPass.setError("Password must contain at least one upper case letter, one lower case letter and a digit");
@@ -88,11 +93,11 @@ public class register extends AppCompatActivity {
                     cancel=false;
                 }
 
-*/
+
 
                 EditText edCon = (EditText)findViewById(R.id.ConfirmPass);
                 String cPass= edCon.getText().toString();
-               /* if(!cPass.equals(pass))
+                if(!cPass.equals(pass))
                 {
                     edCon.setError("Password must match");
                     focus=edCon;
@@ -103,45 +108,34 @@ public class register extends AppCompatActivity {
                     focus.requestFocus();
                     return;
                 }
-*/
-                insert=(Button)findViewById(R.id.btnInsert);
 
-               mDatabase = FirebaseDatabase.getInstance();
-                ref=mDatabase.getReference("userDB");
+        //        ff= new Firebase("https://edocx-1a864.firebaseio.com/userDB");
+                //Toast.makeText(register.this, "before user", Toast.LENGTH_LONG).show();
+                user = new UserInformation(email,name,phnum,pass);
+                //getValues();
+                //Toast.makeText(register.this, "after getvalues", Toast.LENGTH_LONG).show();
+                //DatabaseReference ref =  mDatabase.getRef("userDB");
+                 String userId = mDatabase.push().getKey();
+                //Toast.makeText(register.this, "userID"+userId, Toast.LENGTH_LONG).show();
+                 //mDatabase.setValue(userId);
+                 mDatabase.child(userId).setValue(user);
+                // mDatabase.child(userId).setValue(user);
+               // DatabaseReference ref = mDatabase.child("userDB").push();
+                Toast.makeText(register.this, "Registration Successful", Toast.LENGTH_LONG).show();
+                startActivity(new Intent(getApplicationContext(), LoginActivity.class));
 
-// Creating new user node, which returns the unique key value
-// new user node would be /users/$userid/
-                //String userId = mDatabase.push().getKey();
-        user=new UserInformation();
 
 
-
-    }
-private void getValues()
+            }
+        });}
+/*private void getValues()
 {
+    Toast.makeText(register.this, "inside getValues", Toast.LENGTH_LONG).show();
     user.setEmail(email);
     user.setName(name);
     user.setPass(pass);
     user.setPhone_num(phnum);
 
 
-}
-public void btnInsert(View view)
-{
-    ref.addValueEventListener(new ValueEventListener() {
-        @Override
-        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-            getValues();
-            ref.child("hdus").setValue(user);
-            Toast.makeText(register.this, "Hello", Toast.LENGTH_LONG).show();
-            startActivity(new Intent(getApplicationContext(), LoginActivity.class));
-        }
-
-        @Override
-        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-        }
-    });
-}
+}*/
 }
